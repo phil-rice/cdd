@@ -6,12 +6,11 @@ val versions = new {
   val scala = "2.12.11"
   val scalatest = "3.0.8"
   val mockito = "1.10.19"
-  val mustache = "0.9.5"
   val xingyi = "0.5.6-SNAPSHOT"
 }
 
 lazy val commonSettings = Seq(
-  version := "0.6.1-SNAPSHOT",
+  version := "0.5.7-SNAPSHOT",
   organization := "one.xingyi",
   publishMavenStyle := true,
   scalaVersion := versions.scala,
@@ -56,25 +55,23 @@ lazy val reflectionSettings = publishSettings ++ Seq(
   libraryDependencies += "org.scala-lang" % "scala-compiler" % versions.scala
 )
 
-lazy val jsonSettings = Seq(
-  libraryDependencies += "one.xingyi" %% "json4s" % versions.xingyi
-)
-
-lazy val mustacheSettings = publishSettings ++ Seq(
-  libraryDependencies += "com.github.spullara.mustache.java" % "scala-extensions-2.11" % versions.mustache
-)
 
 lazy val scalatestSettings = publishSettings ++ Seq(
   libraryDependencies += "org.scalatest" %% "scalatest" % versions.scalatest
 )
+lazy val mustacheAndJson4sSettings = publishSettings ++ Seq(
+  libraryDependencies += "one.xingyi" %% "json4s" % versions.xingyi,
+  libraryDependencies += "one.xingyi" %% "mustache" % versions.xingyi
+)
 
-val cddmustache = (project in file("module/cddmustache")).
-  settings(mustacheSettings)
 
 val cddscalatest = (project in file("module/cddscalatest")).
   dependsOn(cddengine % "test->test;compile->compile").
   settings(scalatestSettings)
 
+val cddtest = (project in file("module/cddtest")).
+  dependsOn(cddengine % "test->test;compile->compile").
+  settings(mustacheAndJson4sSettings)
 
 lazy val cddscenario = (project in file("module/cddscenario")).
   settings(reflectionSettings: _*)
@@ -82,8 +79,7 @@ lazy val cddscenario = (project in file("module/cddscenario")).
 val cddexamples = (project in file("module/cddexamples")).
   dependsOn(cddengine % "test->test;compile->compile").
   dependsOn(cddscalatest % "test->test;compile->compile").
-  dependsOn(cddmustache % "test->test;compile->compile").
-  settings(publishSettings)
+  settings(mustacheAndJson4sSettings)
 
 lazy val cddengine = (project in file("module/cddengine")).
   settings(publishSettings: _*).
@@ -92,10 +88,7 @@ lazy val cddengine = (project in file("module/cddengine")).
 lazy val cddscripts = (project in file("module/cddscripts")).
   settings(publishSettings: _*)
 
-lazy val cddTest = (project in file("module/cddTest")).
-  settings(publishSettings: _*).
-  settings(jsonSettings: _*).
-  dependsOn(cddmustache % "test->test;compile->compile").aggregate(cddscenario)
+
 
 
 val cdd = (project in file(".")).
@@ -104,9 +97,8 @@ val cdd = (project in file(".")).
   aggregate(
     cddscenario, //
     cddengine, //
-    cddmustache, //
     cddscalatest, //
     cddexamples, //
-    cddscripts, //
-    cddTest
+    cddscripts,//
+    cddtest
   )

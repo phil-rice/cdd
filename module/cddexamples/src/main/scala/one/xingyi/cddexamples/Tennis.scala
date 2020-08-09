@@ -2,7 +2,7 @@
 package one.xingyi.cddexamples
 
 import one.xingyi.cddengine._
-import one.xingyi.cddmustache.{RawMustache, Mustache}
+import one.xingyi.mustache.{RawMustache, Mustache}
 import one.xingyi.cddscenario.InternetDocument
 class Tennis {
   val definition = InternetDocument("CodingDojo", "http://codingdojo.org/cgi-bin/wiki.pl?KataTennis")
