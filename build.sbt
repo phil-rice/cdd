@@ -6,11 +6,11 @@ val versions = new {
   val scala = "2.12.11"
   val scalatest = "3.0.8"
   val mockito = "1.10.19"
-  val xingyi = "0.5.6-SNAPSHOT"
+  val xingyi = "0.5.9-SNAPSHOT"
 }
 
 lazy val commonSettings = Seq(
-  version := "0.5.7-SNAPSHOT",
+  version := versions.xingyi,
   organization := "one.xingyi",
   publishMavenStyle := true,
   scalaVersion := versions.scala,
