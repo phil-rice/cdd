@@ -2,7 +2,7 @@
 package one.xingyi.cddengine
 import java.text.MessageFormat
 
-import one.xingyi.cddscenario.Scenario
+import one.xingyi.cddscenario.{Scenario, UseCase}
 import one.xingyi.core.UtilsSpec
 import one.xingyi.core.misc.IdMaker
 

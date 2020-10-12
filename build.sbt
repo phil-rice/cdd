@@ -3,11 +3,15 @@ import sbtpgp._
 
 
 val versions = new {
-  val scala = "2.12.11"
-  val scalatest = "3.0.8"
+  val scala12 = "2.12.12"
+  val scala13 = "2.13.3"
+  val scala = scala12
+  val supportedScalaVersions = List(scala12, scala13)
+  val scalatest = "3.2.2"
   val mockito = "1.10.19"
-  val xingyi = "0.5.9-SNAPSHOT"
+  val xingyi = "0.6.4-SNAPSHOT"
 }
+lazy val normalCrossScala= Seq(  crossScalaVersions := versions.supportedScalaVersions)
 
 lazy val commonSettings = Seq(
   version := versions.xingyi,
@@ -51,8 +55,8 @@ lazy val publishSettings = commonSettings ++ Seq(
 
 
 lazy val reflectionSettings = publishSettings ++ Seq(
-  libraryDependencies += "org.scala-lang" % "scala-reflect" % versions.scala,
-  libraryDependencies += "org.scala-lang" % "scala-compiler" % versions.scala
+  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value
 )
 
 
@@ -67,38 +71,50 @@ lazy val mustacheAndJson4sSettings = publishSettings ++ Seq(
 
 val cddscalatest = (project in file("module/cddscalatest")).
   dependsOn(cddengine % "test->test;compile->compile").
+  settings(normalCrossScala).
   settings(scalatestSettings)
 
 val cddtest = (project in file("module/cddtest")).
   dependsOn(cddengine % "test->test;compile->compile").
+  settings(normalCrossScala).
   settings(mustacheAndJson4sSettings)
 
 lazy val cddscenario = (project in file("module/cddscenario")).
+  settings(normalCrossScala).
   settings(reflectionSettings: _*)
 
 val cddexamples = (project in file("module/cddexamples")).
   dependsOn(cddengine % "test->test;compile->compile").
   dependsOn(cddscalatest % "test->test;compile->compile").
+  settings(normalCrossScala).
   settings(mustacheAndJson4sSettings)
 
 lazy val cddengine = (project in file("module/cddengine")).
   settings(publishSettings: _*).
+  settings(normalCrossScala).
   dependsOn(cddscenario % "test->test;compile->compile").aggregate(cddscenario)
 
 lazy val cddscripts = (project in file("module/cddscripts")).
+  settings(normalCrossScala).
   settings(publishSettings: _*)
+
+lazy val cddReq = (project in file("module/cddReq")).
+  settings(normalCrossScala).
+  settings(publishSettings: _*).
+  dependsOn(cddscenario % "test->test;compile->compile").aggregate(cddscenario)
 
 
 
 
 val cdd = (project in file(".")).
   settings(publishSettings).
-  settings(publishArtifact := false).
+  settings(publishArtifact := false, crossScalaVersions := Nil).
   aggregate(
     cddscenario, //
     cddengine, //
     cddscalatest, //
     cddexamples, //
-    cddscripts,//
+    cddscripts, //
+    cddReq,
     cddtest
   )

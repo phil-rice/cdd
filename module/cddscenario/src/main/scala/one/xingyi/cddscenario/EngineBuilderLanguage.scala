@@ -8,7 +8,7 @@ import one.xingyi.core.optics.Lens
 
 import scala.annotation.implicitNotFound
 import scala.language.experimental.macros
-import scala.language.higherKinds
+import scala.language.{higherKinds, implicitConversions}
 
 
 //just to make equals work. Will probably remove when refactor scenario logic
@@ -35,13 +35,14 @@ class ScBuilder[P, R, HasResult, HasWhen, HasCode, HasBecause](protected[cddscen
     case (None, None, None, Some(r)) => ResultScenarioLogic(r, data.definedInSourceCodeAt, ifString)
     case x => throw new RuntimeException(s"Unexpected pattern of whens and becauses and stuff $x")
   }
-  def scenario = Scenario[P, R](situation, optResult, scenarioLogic, List(), data)
+  lazy val scenario: Scenario[P, R] = Scenario[P, R](situation, optResult, scenarioLogic, List(), data)
   protected[cddscenario] def withResultPrim(r: R) = new ScBuilder[P, R, Yes, HasWhen, No, No](id, situation, data, Some(r), optWhen, optCode, optBecause, ifString, thenString)
-//  protected[cddscenario] def withBecausePrim(because: PartialFunction[P, R], ifString: String, thenString: String) = new ScBuilder[P, R, HasResult, No, HasCode, Yes](id, situation, data, optResult, optWhen, optCode, Some(because), ifString, thenString)
+  //  protected[cddscenario] def withBecausePrim(because: PartialFunction[P, R], ifString: String, thenString: String) = new ScBuilder[P, R, HasResult, No, HasCode, Yes](id, situation, data, optResult, optWhen, optCode, Some(because), ifString, thenString)
 }
 
 
 object ScBuilder {
+  implicit def toScenario[P, R](b: ScBuilder[P, R, _, _, _, _]): Scenario[P, R] = b.scenario
   implicit def toData[P, R, HasResult, HasWhen, HasCode, HasBecause](implicit scenarioAggregator2: ScenarioAggregator2[P, R]): Lens[ScBuilder[P, R, HasResult, HasWhen, HasCode, HasBecause], EngineComponentData] =
     Lens(_.data, (w, d) => w.withData(data = d))
 }

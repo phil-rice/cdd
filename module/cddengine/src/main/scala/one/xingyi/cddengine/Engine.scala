@@ -4,7 +4,7 @@ package one.xingyi.cddengine
 import java.text.MessageFormat
 
 import one.xingyi.cddengine
-import one.xingyi.cddscenario.{HasScenarios, Scenario, ScenarioLogic}
+import one.xingyi.cddscenario.{DecisionIssue, HasScenarios1, HasUseCases1, Scenario, ScenarioLogic, UseCase}
 import one.xingyi.core.json.{JsonMaps, JsonObject, JsonWriter, TemplateEngine}
 import one.xingyi.core.misc.IdMaker
 import one.xingyi.core.optics.Lens
@@ -26,7 +26,7 @@ trait EngineTools[P, R] {
   def useCases: Seq[UseCase[P, R]]
   def scenarios: Seq[Scenario[P, R]]
   def decisionTree: DecisionTree[P, R]
-  def issues: Seq[DecisionIssue[P, R]]
+  def issues: Seq[DecisionIssue[ConclusionNode,P, R]]
   def printTraceAboutAdding[J: JsonWriter](prefix: String)(implicit config: RenderingConfig, validation: Validation[P, R], template: TemplateEngine[J], urlGenerators: EngineUrlGenerators[P, R], printRenderToFile: PrintRenderToFile): Unit
   def printPages[J: JsonWriter](prefix: String)(implicit config: RenderingConfig, template: TemplateEngine[J], urlGenerators: EngineUrlGenerators[P, R], printRenderToFile: PrintRenderToFile): Unit
   def test(name: String): CddTest
@@ -54,7 +54,7 @@ class SimpleEngineTools[P, R](val engine: Engine1[P, R]) extends SimplePrintEngi
   override def decisionTree: DecisionTree[P, R] = engine.decisionTree
   override def scenarios: Seq[Scenario[P, R]] = engine.scenarios
   override def useCases: Seq[UseCase[P, R]] = engine.useCases
-  override def issues: List[DecisionIssue[P, R]] = engine.decisionTree.issues
+  override def issues: List[DecisionIssue[ConclusionNode,P, R]] = engine.decisionTree.issues
   override def trace(p: P): TraceThroughEngineResultData[P, R] = TraceThroughEngineResultData[P, R](DecisionTree.findWithParents(engine.decisionTree, p), decisionTree.root.findLens(p))
 }
 
@@ -71,7 +71,7 @@ case class BuildEngineRawData[P, R](tree: DecisionTree[P, R], useCases: Seq[UseC
 
 trait DecisionTreeMaker[T[_, _], P, R] extends (T[P, R] => BuildEngineRawData[P, R])
 
-case class SimpleDecisionMaker[T[_, _], P, R](implicit hasScenarios: HasScenarios[T], hasUseCases: HasUseCases[T], dtFolder: DecisionTreeFolder) extends DecisionTreeMaker[T, P, R] {
+ class SimpleDecisionMaker[T[_, _], P, R](implicit hasScenarios: HasScenarios1[T], hasUseCases: HasUseCases1[T], dtFolder: DecisionTreeFolder) extends DecisionTreeMaker[T, P, R] {
   override def apply(t: T[P, R]): BuildEngineRawData[P, R] = {
     val scenarios = hasScenarios.allScenarios[P, R](t)
     val decisionTree = scenarios.foldLeft(DecisionTree.empty[P, R])(dtFolder.foldFn)
@@ -80,11 +80,11 @@ case class SimpleDecisionMaker[T[_, _], P, R](implicit hasScenarios: HasScenario
 }
 
 object DecisionTreeMaker {
-  implicit def defaultDecisionTreeMaker[T[_, _], P, R](implicit hasScenarios: HasScenarios[T], hasUseCases: HasUseCases[T], dtFolder: DecisionTreeFolder): DecisionTreeMaker[T, P, R] = new SimpleDecisionMaker
+  implicit def defaultDecisionTreeMaker[T[_, _], P, R](implicit hasScenarios: HasScenarios1[T], hasUseCases: HasUseCases1[T], dtFolder: DecisionTreeFolder): DecisionTreeMaker[T, P, R] = new SimpleDecisionMaker
 }
 
 object Engine {
-  def apply[T[_, _] : HasScenarios : HasUseCases, P, R](t: T[P, R])(implicit decisionTreeMaker: DecisionTreeMaker[T, P, R]): Engine[P, R] = {
+  def apply[T[_, _] : HasScenarios1 : HasUseCases1, P, R](t: T[P, R])(implicit decisionTreeMaker: DecisionTreeMaker[T, P, R]): Engine[P, R] = {
     val rawData = decisionTreeMaker(t)
     import rawData._
     Engine1[P, R](tree, scenarios, useCases)

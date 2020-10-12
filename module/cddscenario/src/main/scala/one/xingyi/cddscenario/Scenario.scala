@@ -6,10 +6,12 @@ import one.xingyi.core.strings.ShortPrint
 
 import scala.language.higherKinds
 
-trait HasScenarios[T[_, _]] {
+trait HasScenarios1[T[_, _]] {
   def allScenarios[P, R](t: T[P, R]): List[Scenario[P, R]]
 }
-
+trait HasScenarios2[T[_, _, _]] {
+  def allScenarios[P1, P2, R](t: T[P1, P2, R]): List[Scenario[(P1, P2), R]]
+}
 object Scenario {
   implicit def scenarioIsDefined[P, R]: IsDefinedInSourceCodeAt[Scenario[P, R]] = _.data.definedInSourceCodeAt
   implicit def scenarioData[P, R]: HasEngineComponentData[Scenario[P, R]] = s => s.data

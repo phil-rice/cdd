@@ -2,8 +2,8 @@
 package one.xingyi.cddexamples
 
 import one.xingyi.cddengine._
-import one.xingyi.mustache.{RawMustache, Mustache}
-import one.xingyi.cddscenario.InternetDocument
+import one.xingyi.mustache.{Mustache, RawMustache}
+import one.xingyi.cddscenario.{InternetDocument, UseCase2}
 class Tennis {
   val definition = InternetDocument("CodingDojo", "http://codingdojo.org/cgi-bin/wiki.pl?KataTennis")
   val wikipedia = InternetDocument("Wikipedia", "http://en.wikipedia.org/wiki/Tennis_score")

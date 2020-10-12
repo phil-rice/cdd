@@ -3,7 +3,8 @@ package one.xingyi.cddexamples
 
 import java.time.LocalDateTime
 
-import one.xingyi.cddengine.{Engine, UseCase, UseCase2}
+import one.xingyi.cddengine.Engine
+import one.xingyi.cddscenario.UseCase2
 
 import scala.language.implicitConversions
 

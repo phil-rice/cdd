@@ -3,7 +3,7 @@ package one.xingyi.cddengine
 
 import java.io.{File, PrintWriter}
 
-import one.xingyi.cddscenario.{HasEngineComponentData, Scenario}
+import one.xingyi.cddscenario.{DecisionIssue, HasEngineComponentData, Scenario, UseCase}
 import one.xingyi.core.json.JsonLanguage._
 import one.xingyi.core.json.{JsonList, JsonObject, JsonValue}
 import one.xingyi.core.language.AnyLanguage._
@@ -67,7 +67,7 @@ trait DecisionTreeRendering[J, P, R] {
   def node: DecisionTreeNode[P, R] => J = {case c: ConclusionNode[P, R] => conclusionNode(c); case d: DecisionNode[P, R] => decisionNode(d)}
   def decisionNode: DecisionNode[P, R] => J
   def conclusionNode: ConclusionNode[P, R] => J
-  def issue: DecisionIssue[P, R] => J
+  def issue: DecisionIssue[ConclusionNode,P, R] => J
   def andThen[J1](fn: J => J1): DecisionTreeRendering[J1, P, R] = new TransformingTreeRending(this, fn)
 }
 
@@ -80,7 +80,7 @@ class TransformingTreeRending[J, J1, P, R](val rendering: DecisionTreeRendering[
   override def scenario: Scenario[P, R] => J1 = rendering.scenario andThen transform
   override def decisionNode: DecisionNode[P, R] => J1 = rendering.decisionNode andThen transform
   override def conclusionNode: ConclusionNode[P, R] => J1 = rendering.conclusionNode andThen transform
-  override def issue: DecisionIssue[P, R] => J1 = rendering.issue andThen transform
+  override def issue: DecisionIssue[ConclusionNode,P, R] => J1 = rendering.issue andThen transform
 }
 class SimpleDecisionTreeRendering[P, R](implicit shortPrintP: ShortPrint[P], shortPrintR: ShortPrint[R], urlGenerator: EngineUrlGenerators[P, R]) extends DecisionTreeRendering[JsonObject, P, R] {
   implicit class JsonObjectOps(j: JsonObject) {
@@ -109,7 +109,7 @@ class SimpleDecisionTreeRendering[P, R](implicit shortPrintP: ShortPrint[P], sho
   override def decisionNode: DecisionNode[P, R] => JsonObject = d => JsonObject("decisionNode" -> JsonObject("condition" -> toJsonString(d.logic.ifString), "ifTrue" -> node(d.ifTrue), "ifFalse" -> node(d.ifFalse))).defined(d)
   override def conclusionNode: ConclusionNode[P, R] => JsonObject = c => JsonObject("conclusionNode" -> JsonObject("scenarios" -> JsonList(c.scenarios.map(scenario)))).defined(c)
   override def scenario: Scenario[P, R] => JsonObject = s => JsonObject("situation" -> shortPrintP(s.situation), "url" -> urlGenerator.scenario(s)).data(s)
-  override def issue: DecisionIssue[P, R] => JsonObject = e => JsonObject("issue" -> e.toString)
+  override def issue: DecisionIssue[ConclusionNode,P, R] => JsonObject = e => JsonObject("issue" -> e.toString)
 }
 
 case class ScenarioAndPathThroughTree[P, R](s: Scenario[P, R], nodes: List[DecisionTreeNode[P, R]])
