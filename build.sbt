@@ -9,7 +9,7 @@ val versions = new {
   val supportedScalaVersions = List(scala12, scala13)
   val scalatest = "3.2.2"
   val mockito = "1.10.19"
-  val xingyi = "0.6.4-SNAPSHOT"
+  val xingyi = "0.6.7"
 }
 lazy val normalCrossScala= Seq(  crossScalaVersions := versions.supportedScalaVersions)
 
