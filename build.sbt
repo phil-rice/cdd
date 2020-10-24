@@ -9,12 +9,18 @@ val versions = new {
   val supportedScalaVersions = List(scala12, scala13)
   val scalatest = "3.2.2"
   val mockito = "1.10.19"
-  val xingyi = "0.7.3"
+  val xingyi = "0.7.6"
 }
 lazy val normalCrossScala = Seq(crossScalaVersions := versions.supportedScalaVersions)
 
 lazy val commonSettings = Seq(
-  version := versions.xingyi,
+  credentials += Credentials("Sonatype Nexus Repository Manager",
+    "oss.sonatype.org",
+    "phil.rice",
+    "!WV9E4yYvNqD6jCr")
+
+,
+    version := versions.xingyi,
   organization := "one.xingyi",
   publishMavenStyle := true,
   scalaVersion := versions.scala,
